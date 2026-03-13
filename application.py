@@ -101,7 +101,7 @@ class City(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     url = Column(String)
-    adminid = Column(Integer)
+    adminid = Column(Integer, ForeignKey('admin.id'))
 
     def as_dict(self):
         return {
@@ -109,6 +109,7 @@ class City(Base):
             "name": self.name,
             "url": self.url,
             "adminid": self.adminid
+        }
         }
 
 
