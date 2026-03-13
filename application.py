@@ -110,7 +110,7 @@ class City(Base):
             "url": self.url,
             "adminid": self.adminid
         }
-        }
+        
 
 
 class UserCity(Base):
