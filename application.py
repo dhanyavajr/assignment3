@@ -85,8 +85,51 @@ class Admin(Base):
         for c in self.__table__.columns:
             fields[c.name] = getattr(self, c.name)
         return fields
+# myedits 1
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    password = Column(String)
+
+    def as_dict(self):
+        return {"id": self.id, "name": self.name, "password": self.password}
 
 
+class City(Base):
+    __tablename__ = 'cities'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    url = Column(String)
+    adminid = Column(Integer)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "url": self.url,
+            "adminid": self.adminid
+        }
+
+
+class UserCity(Base):
+    __tablename__ = 'usercities'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cityId = Column(Integer)
+    userId = Column(Integer)
+    month = Column(String)
+    year = Column(String)
+    weather_params = Column(String)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "cityId": self.cityId,
+            "userId": self.userId,
+            "month": self.month,
+            "year": self.year,
+            "weather_params": self.weather_params
+        }
 
 ## Admin REST API
 @app.route("/admin", methods=['POST'])
@@ -153,6 +196,73 @@ def delete_admin_by_id(id):
         session.commit()
         status = ("Admin with id {id} deleted.\n").format(id=id)
         return Response(status, status=200)
+
+## my USER REST API edits
+
+@app.route("/users", methods=['POST'])
+def add_user():
+
+    data = request.json
+    name = data['name']
+    password = data['password']
+
+    session = DBSession()
+
+    existing_user = session.query(User).filter_by(name=name).first()
+
+    if existing_user:
+        return Response("User already exists\n", status=400)
+
+    user = User(name=name, password=password)
+
+    session.add(user)
+    session.commit()
+
+    return user.as_dict()
+
+
+@app.route("/users")
+def get_users():
+
+    session = DBSession()
+
+    users = session.query(User)
+
+    user_list = []
+
+    for user in users:
+        user_list.append(user.as_dict())
+
+    return {"users": user_list}
+
+
+@app.route("/users/<id>")
+def get_user_by_id(id):
+
+    session = DBSession()
+
+    user = session.get(User, id)
+
+    if user == None:
+        return Response("User not found\n", status=404)
+
+    return user.as_dict()
+
+
+@app.route("/users/<id>", methods=['DELETE'])
+def delete_user(id):
+
+    session = DBSession()
+
+    user = session.query(User).filter_by(id=id).first()
+
+    if user == None:
+        return Response("User not found\n", status=404)
+
+    session.delete(user)
+    session.commit()
+
+    return Response(f"User with id {id} deleted\n", status=200)
 
 
 @app.route("/logout",methods=['GET'])
