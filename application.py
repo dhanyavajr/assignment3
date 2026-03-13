@@ -328,7 +328,6 @@ def adminindex():
 
 
 if __name__ == "__main__":
-
-    app.debug = False
+    app.debug = True  # turn on debug
     app.logger.info('Portal started...')
     app.run(host='0.0.0.0', port=5009) 
